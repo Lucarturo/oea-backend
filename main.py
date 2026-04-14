@@ -1,39 +1,63 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
-from database import engine, Base
-from api.v1.router import api_router
+# 🔥 IMPORTANTE: importa tu Base y engine
+from database import Base, engine
 
-# 🔥 IMPORTAR TODOS LOS MODELOS (UNA SOLA VEZ)
-import db.models
+# 👇 importa tus routers (ajusta según tu proyecto)
+# from api.empresas import router as empresas_router
+# from api.auth import router as auth_router
 
 app = FastAPI(
-    title="OEA Backend",
+    title="OEA Backend API",
     version="1.0.0"
 )
 
-# 🌐 CORS
+# ✅ CORS (para frontend futuro)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠️ en producción restringir
+    allow_origins=["*"],  # en producción puedes restringir
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 🔗 ROUTES
-app.include_router(api_router, prefix="/api/v1")
-
-# 🗄️ CREAR TABLAS (solo en desarrollo)
+# 🔥 CREAR TABLAS AUTOMÁTICAMENTE
 Base.metadata.create_all(bind=engine)
 
 
-# ❤️ HEALTH CHECK
+# ===============================
+# 🟢 ENDPOINTS BÁSICOS
+# ===============================
+
 @app.get("/")
-def home():
+def root():
+    return {"message": "API OEA funcionando 🚀"}
+
+
+@app.get("/salud")
+def salud():
+    return {"status": "ok"}
+
+
+# ===============================
+# 🧩 INCLUIR ROUTERS
+# ===============================
+
+# 👉 descomenta cuando tengas tus routers
+# app.include_router(empresas_router, prefix="/empresas", tags=["Empresas"])
+# app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+
+
+# ===============================
+# 🧠 DEBUG INFO (opcional)
+# ===============================
+
+@app.get("/debug-db")
+def debug_db():
+    database_url = os.getenv("DATABASE_URL")
     return {
-        "status": "ok",
-        "service": "OEA Backend",
-        "version": "v1",
-        "docs": "/docs"
+        "database_url_detected": bool(database_url),
+        "database_url_preview": database_url[:20] + "..." if database_url else None
     }
