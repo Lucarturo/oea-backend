@@ -1,0 +1,21 @@
+from pydantic import BaseModel
+
+
+class UsuarioCreate(BaseModel):
+    email: str
+    password: str
+
+
+class UsuarioResponse(BaseModel):
+    id: int
+    email: str
+    rol: str
+
+    class Config:
+        from_attributes = True
+
+
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
